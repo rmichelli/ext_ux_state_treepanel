@@ -86,6 +86,13 @@ Ext.override(Ext.ux.state.TreePanel, {
                     }
                 }
             }
+
+            // store current scroll position prior to load so it may be applied afterwards
+            ,beforerootremoveall:function() {
+                if (this.body) {
+                    this.stateHash.scroll = this.body.getScroll();
+                }
+            }
         });
 
         // update state on node expand or collapse
@@ -106,9 +113,19 @@ Ext.override(Ext.ux.state.TreePanel, {
                     // so do it once on root load
                     this.root.on({
                     load: { single: true, scope: this, fn: function() {
-                            for(var p in this.stateHash) {
+                            var p, scroll = this.stateHash.scroll;
+
+                            delete this.stateHash.scroll;
+
+                            for(p in this.stateHash) {
                                 if(this.stateHash.hasOwnProperty(p)) {
                                     this.expandPath(this.stateHash[p]);
+                                }
+                            }
+
+                            for(p in scroll) {
+                                if(scroll.hasOwnProperty(p)) {
+                                    this.body.scrollTo(p, scroll[p]);
                                 }
                             }
                         }}
